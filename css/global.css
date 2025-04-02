@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  font-family: "Nunito", sans-serif;
+}
+button{
+  cursor: pointer;
+  transition: 0.4s;
+}
+button:active{
+  transition: 0.05s;
+  transform: scale(105%);
+}
+
+body {
+  --color1: #f7f7f7;
+  --color2: #292021;
+  --color3: #886750;
+
+  font-family: "Nunito", sans-serif;
+
+  min-height: 100vh;
+  background-image: url(../img/header_main.jpg);
+  background-position: center center;
+  background-size: cover;
+  overflow-x: hidden;
+}
+
+body::-webkit-scrollbar{
+  width: 4px;
+}
+body::-webkit-scrollbar-thumb{
+  width: 4px;
+  background-color: var(--color3);
+  border-radius: 4px;
+}

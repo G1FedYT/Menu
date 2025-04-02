@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta property="og:title" content="Example of Pro Version">
+  <meta property="og:description" content="Premiere of the interactive menu Pro version">
+  <meta property="og:image" content="">
+  <meta property="og:url" content="">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="./img/Logo.png">
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>IQRMenuProEN</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./css/global.css">
+  <link rel="stylesheet" href="./css/menu.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" defer=""></script>
+  <script type="module" src="./js/main.js" defer></script>
+</head>
+
+<body>
+  <nav>
+    <div class="container">
+      <div class="nav__elements">
+        <div class="nav__links">
+          <a href="./menu-ru.html">RU</a>
+        </div>
+        <button class="basket"><i class="fa-solid fa-basket-shopping"></i></button>
+        <button class="basket-clouse">
+          <i class="fa-solid fa-reply"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+  <div class="annonce-block">
+    <h2 id="announcement"></h2>
+    <p id="announcementText"></p>
+    <button id="annonce-block-clouse">Ok</button>
+  </div>
+
+  <div class="loader">
+    <img src="./img/Logo.png" alt="">
+    <p id="loaderText"></p>
+  </div>
+
+  <div id="dishesCategoryList" class="category-list"></div>
+  <div id="dishesList" class="dishes-list"></div>
+
+  <div class="basket-box">
+    <button id="yourOrder" class="_display_none"></button>
+    <h3 id="yourCart"></h3>
+    <div class="basket-box__total-price" id="totalCost"></div>
+    <div id="basketList" class="basket-box__list basket-list"></div>
+    <button class="button-order _display_none" id="sendOrder"></button>
+  </div>
+
+  <div class="order-box">
+    <button id="orderBoxClouse"><i class="fa-solid fa-xmark"></i></button>
+    <h2 id="yourOrderTitle"></h2>
+    <p class="totalCost-order" id="totalCostOrder"></p>
+    <div class="order-list"></div>
+    <button id="payOrderButton"></button>
+  </div>
+
+  <footer>
+    <a id="google-link">
+      <i class="fa-solid fa-comment-dots"></i>
+      <span id="googleFedback"></span>
+    </a>
+  </footer>
+
+  <div class="wrapper">
+    <div class="dialogBox">
+
+    </div>
+  </div>
+</body>
+
+</html>
