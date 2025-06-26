@@ -6,16 +6,23 @@ const basketButtonOpen = document.querySelector('.basket');
 const basketButtonClose = document.querySelector('.basket-clouse');
 const basketBox = document.querySelector('.basket-box');
 const basketTotalCostSpan = document.querySelector('#totalCost');
+const orderSendButton = document.querySelector('#sendOrder');
 const valutaSymbol = "₽";
+const wrapper = document.querySelector(".wrapper")
+
+let tableNumber = ""
+let activeCategory = ""
 
 let menuStore;
 let basketListStore = [];
+let orderListStore = [];
 
 fetchDishesList()
     .then(data => {
         menuStore = data;
-        RenderCategoryButton()
-        RenderMenu(menuStore[0][`${userLanguage}Category`])
+        RenderCategoryButton();
+        RenderMenu(menuStore[0][`${userLanguage}Category`]);
+        activeCategory = menuStore[0][`${userLanguage}Category`];
     })
 
 function RenderCategoryButton() {
@@ -32,6 +39,7 @@ function RenderCategoryButton() {
                 RenderMenu(item[`${userLanguage}Category`]);
                 categoryListDiv.querySelector('.button_active').classList.remove('button_active');
                 categoryButton.classList.add('button_active');
+                activeCategory = item[`${userLanguage}Category`]
             });
             categoryListDiv.appendChild(categoryButton);
             addedCategorys.add(item[`${userLanguage}Category`]);
@@ -158,7 +166,7 @@ function busketUpdate(
         const currentAmount = parseInt(spanNumber.innerText) + 1;
         spanNumber.innerText = currentAmount;
         const cardInBasket = basketListStore.find(basketItem => basketItem.portionId == portionId);
-        
+        orderSendButton.classList.remove("_display_none")
         if(buttonType == "basket"){
             if (cardDivInMenu) {
                 const portionNumberSpan = cardDivInMenu.querySelector(`[data-id="${portionId}"]`).querySelector(".portion-number");
@@ -204,11 +212,14 @@ function busketUpdate(
                         cardDivInMenu.classList.remove("dishes-card_active");
                     }
                 }
+                if (basketListStore.length == 0){
+                    orderSendButton.classList.add("_display_none")
+                }
             }
             else {
                 const cardInBasket = basketListStore.find(basketItem => basketItem.portionId == portionId);
                 if (cardInBasket) {
-                    cardInBasket.currentAmount = currentAmount;
+                    cardInBasket.currentAmount = currentAmount
                 }
             }
 
@@ -284,6 +295,141 @@ function basketRender() {
     })
     basketTotalCostSpan.innerHTML = `Общая стоимость блюд в корзине: ${basketTotalCost}${valutaSymbol}`
 }
+
+function createOrderId() {
+    const now = new Date();
+    
+    // Получаем компоненты даты и времени
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    // Формируем ID в нужном формате
+    const orderId = `${day}_${month}_${year}__${hours}_${minutes}_${seconds}`;
+    
+    return orderId;
+}
+
+function createMessage() {
+    let orderListMessage = ``;
+    let orderItemNumber = 0;
+
+    const orderId = createOrderId()
+
+    let totalCost = 0
+
+    basketListStore.forEach(basketCard => {
+        orderItemNumber++;
+        orderListMessage += `
+${orderItemNumber}) ${basketCard.mainLanguageName} (${basketCard.category})
+    ${basketCard.portionName} x ${basketCard.currentAmount} = ${parseInt(basketCard.portionCost) * parseInt(basketCard.currentAmount)}${valutaSymbol}
+    ${basketCard.userLanguageName}
+
+        `
+        totalCost += parseInt(basketCard.portionCost) * parseInt(basketCard.currentAmount);
+    })
+
+    let textMessage = `
+Новый заказ!
+Язык посетителя - ${userLanguage}
+Номер стола - ${tableNumber}
+Номер заказа - #N${orderId}
+
+Список блюд:
+${orderListMessage}
+
+Общая стоимость блюд: ${totalCost}${valutaSymbol}
+    `;
+
+
+sendMessageToTG(textMessage)
+}
+function sendMessageToTG(messageText) {
+    console.log("Пытаемся отправить сообщение в Telegram...");
+
+    setTimeout(() => {
+        fetch('https://send-message-to-tg.gosha4ka4.workers.dev', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chatId: "-1002466562204",
+                messageText: messageText,
+            }),
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log("Успешно отправлено:", data);
+                orderSendButton.classList.add("_display_none")
+                basketListStore.forEach(item => {
+                    orderListStore.unshift(item);
+                });
+                basketListStore = [];
+                basketRender();
+                if (activeCategory){
+                    RenderMenu(activeCategory)
+                }  
+            })
+            .catch(error => {
+                console.error("Ошибка при отправке:", error);
+            });
+    }, 1000);
+}
+
+function createDialogueBox(type, text){
+    const dialogueBoxDiv = document.querySelector(".dialogBox");
+    dialogueBoxDiv.innerHTML = ``
+    switch (type) {
+        case "Request table number":{
+            dialogueBoxDiv.innerHTML = `
+                <p>${text}</p>
+                <input type="number" placeholder="№" min="1">
+                <div class="dialogBox__buttons">
+                    <button class="ok-button">Ок</button>
+                    <button class="cancel-button">Отмена</button>
+                </div>
+            `;
+            const cancel = dialogueBoxDiv.querySelector(".cancel-button")
+            cancel.addEventListener("click", ()=>{
+                wrapper.classList.remove("wrapper_active")
+            })
+
+            const ok = dialogueBoxDiv.querySelector(".ok-button")
+            const input = dialogueBoxDiv.querySelector("input")
+            ok.addEventListener("click", ()=>{
+                const tableNum = input.valueAsNumber
+                if (!isNaN(tableNum)){
+                    wrapper.classList.remove("wrapper_active")
+                    tableNumber = tableNum
+                    createMessage()
+                }
+                else{
+                    dialogueBoxDiv.querySelector("p").innerText = "Введите числовое значение!"
+                }
+               
+            })
+            wrapper.classList.add("wrapper_active")
+            break;
+        }
+    
+        default:
+            break;
+    }
+}
+
+orderSendButton.addEventListener('click', () =>{
+    if (Number.isFinite(tableNumber)){
+        createMessage()
+    }
+    else{
+        createDialogueBox("Request table number", "Введите номер стола")
+    }
+})
 
 basketButtonOpen.addEventListener('click', () => {
     basketButtonClose.classList.toggle('basket-clouse_active');
